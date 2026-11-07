@@ -1,0 +1,202 @@
+app:
+  name: qq-agent
+  timezone: Asia/Shanghai
+log:
+  level: info
+  pretty: true
+storage:
+  dbPath: data/brain.db
+  logDir: logs
+napcat:
+  enabled: true
+  mode: forward-ws
+  url: ws://127.0.0.1:3001
+  accessToken: erii2024secretkey
+  selfId: 0
+  reconnect:
+    initialMs: 1000
+    maxMs: 30000
+    factor: 1.8
+  heartbeat:
+    intervalMs: 30000
+    timeoutMs: 10000
+trigger:
+  private: always
+  privateKeywords: []
+  group:
+    requireAt: true
+    keywords: []
+    prefixes: []
+    cooldownMs: 5000
+    maxConcurrent: 2
+    ignoreSelf: true
+    enabledGroups: []
+    recordAllMessages: true
+  allowUsers: []
+  denyUsers: []
+  admins:
+  - 1701793763
+  commandAdminOnly: true
+  personaAdminOnly: true
+  commandPermissions: {}
+persona:
+  default: erii
+  scope:
+    private: ''
+    groups: {}
+  commandEnabled: true
+  commandPrefix: /persona
+proactive:
+  enabled: true
+  mode: hybrid
+  everyNMessages: 10
+  probability: 0.1
+  relevanceProbability: 0.5
+  relevanceThreshold: 0.6
+  minIntervalMs: 1800000
+  minGapAfterBotMs: 180000
+  maxPerHourPerScope: 2
+  imageLookback: 3
+  quietHours:
+  - 23:00-08:00
+  onlyWhenAddressed: false
+llm:
+  defaultProvider: inkstone
+  defaultModel: deepseek-v4-flash-0731
+  fallback: []
+  roles:
+    chat:
+      provider: inkstone
+      model: deepseek-v4-flash-0731
+    emotion:
+      provider: inkstone
+      model: deepseek-v4-flash-0731
+    summary:
+      provider: inkstone
+      model: deepseek-v4-flash-0731
+    facts:
+      provider: inkstone
+      model: deepseek-v4-flash-0731
+    embedding:
+      provider: ''
+      model: ''
+    vision:
+      provider: router77625
+      model: gemini-3.8-flash-n
+    asr:
+      provider: groq
+      model: whisper-large-v3
+    tts:
+      provider: edge-tts
+      model: tts-1
+  modelOverrides: {}
+  request:
+    timeoutMs: 120000
+    maxRetries: 2
+    retryDelayMs: 800
+  generation:
+    temperature: 0.9
+    maxTokens: 1024
+    stream: true
+    summaryMaxTokens: 1200
+  tokenBudgets:
+    chat: 0
+    vision: 0
+    sticker: 0
+    emotion: 0
+    facts: 0
+    summary: 0
+    daily: 0
+memory:
+  recentTurns: 4
+  factExtraction: true
+  retrieval:
+    fts: true
+    limit: 20
+    timeDecayHalfLifeDays: 30
+    semantic: true
+    semanticMinScore: 0.35
+    crossScopeSharing: identity-facts
+    shareableFactTypes:
+    - identity
+    - preference
+    - skill
+    - goal
+  summary:
+    enabled: true
+    triggerMessages: 20
+    keepRecentTurns: 2
+    maxLevel: 3
+emotion:
+  enabled: true
+  mode: hybrid
+  smoothing: 0.3
+  affectPersona: true
+  dimensions:
+  - valence
+  - arousal
+  - dominance
+context:
+  maxTokensRatio: 0.5
+  modelContextWindow: 32768
+  reserveForReply: 512
+  compressStrategy: layered
+scheduling:
+  shortMessageMergeMs: 2000
+
+reply:
+  segmented:
+    enabled: true
+    intervalMethod: log
+    logBase: 2.3
+    interval:
+    - 1.5
+    - 3.5
+    maxSegments: 3
+    minCharsToSplit: 20
+  mentionOnReply: false
+  quoteOnReply: false
+  typingDelayMs:
+  - 800
+  - 3000
+  pokeBack: true
+  pokeReply: true
+  recentImages: 2
+  emojiLike:
+    enabled: false
+    emojiId: '128077'
+    onEmotions:
+    - joy
+sticker:
+  enabled: false
+  dir: config/stickers
+  manifest: manifest.json
+  maxPerReply: 1
+  autoOnEmotions: []
+  maxTagsInPrompt: 40
+  descCharsInPrompt: 18
+  autoSend:
+    enabled: false
+    emotions: []
+    minIntensity: 0.55
+    probability: 0.35
+    cooldownSec: 180
+    requireDesc: true
+server:
+  enabled: true
+  host: 127.0.0.1
+  port: 3081
+  authToken: ''
+tasks:
+  remindersEnabled: false
+  dailyEnabled: false
+speech:
+  asr:
+    enabled: true
+  tts:
+    enabled: true
+    mode: on-audio
+    voice: erii
+    format: mp3
+    maxChars: 200
+    protocol: openai

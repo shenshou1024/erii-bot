@@ -1,0 +1,14 @@
+[Unit]
+Description=QQ Auto Approve Friend and Group Requests
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/QQagent
+ExecStart=/usr/bin/python3 /opt/QQagent/auto_approve.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
