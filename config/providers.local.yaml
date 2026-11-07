@@ -1,35 +1,12 @@
 providers:
-  inkstone:
-    displayName: 书生·端砚
-    protocol: openai
-    baseURL: https://discovery-api.intern-ai.org.cn/v1
-    apiKeyEnv: INKSTONE_API_KEY
-    models: []
-    enabled: true
-  edge-tts:
-    displayName: Edge TTS（免费）
-    protocol: openai
-    baseURL: http://127.0.0.1:9880/v1
-    apiKey: edge-tts
-    models:
-    - id: tts-1
-      name: TTS-1
-    enabled: true
-  groq:
-    displayName: Local Whisper ASR
-    protocol: openai
-    baseURL: http://127.0.0.1:9881/v1
-    apiKey: local-asr
-    models:
-    - id: whisper-large-v3
-      name: Whisper Large v3
-    enabled: true
-  router77625:
-    displayName: 77625 路由站
-    protocol: openai
-    baseURL: https://ly.77625.xyz/v1
-    apiKey: sk-77625-06be9e5f5c426de97e929477836fdf144d6752f6
-    models:
-    - id: gemini-3.8-flash
-      name: Gemini 3.8 Flash
-    enabled: true
+  # 在这里配置你的模型 Provider
+  # 示例：
+  # your-provider:
+  #   displayName: 你的 Provider 名称
+  #   protocol: openai
+  #   baseURL: https://api.example.com/v1
+  #   apiKey: your-api-key
+  #   models:
+  #   - id: your-model-id
+  #     name: 你的模型名称
+  #   enabled: true

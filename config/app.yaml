@@ -11,7 +11,7 @@ napcat:
   enabled: true
   mode: forward-ws
   url: ws://127.0.0.1:3001
-  accessToken: erii2024secretkey
+  accessToken: your-access-token
   selfId: 0
   reconnect:
     initialMs: 1000
@@ -35,7 +35,7 @@ trigger:
   allowUsers: []
   denyUsers: []
   admins:
-  - 1701793763
+  - your-qq-number
   commandAdminOnly: true
   personaAdminOnly: true
   commandPermissions: {}
@@ -61,34 +61,34 @@ proactive:
   - 23:00-08:00
   onlyWhenAddressed: false
 llm:
-  defaultProvider: inkstone
-  defaultModel: deepseek-v4-flash-0731
+  defaultProvider: ''
+  defaultModel: ''
   fallback: []
   roles:
     chat:
-      provider: inkstone
-      model: deepseek-v4-flash-0731
+      provider: ''
+      model: ''
     emotion:
-      provider: inkstone
-      model: deepseek-v4-flash-0731
+      provider: ''
+      model: ''
     summary:
-      provider: inkstone
-      model: deepseek-v4-flash-0731
+      provider: ''
+      model: ''
     facts:
-      provider: inkstone
-      model: deepseek-v4-flash-0731
+      provider: ''
+      model: ''
     embedding:
       provider: ''
       model: ''
     vision:
-      provider: router77625
-      model: gemini-3.8-flash-n
+      provider: ''
+      model: ''
     asr:
-      provider: groq
-      model: whisper-large-v3
+      provider: ''
+      model: ''
     tts:
-      provider: edge-tts
-      model: tts-1
+      provider: ''
+      model: ''
   modelOverrides: {}
   request:
     timeoutMs: 120000
