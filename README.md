@@ -71,9 +71,52 @@ providers:
     baseURL: https://api.example.com/v1
 ```
 
-### 3. 调整人设
+### 3. 自定义人设
 
-编辑 `personas/erii.yaml`，修改性格、说话方式、记忆背景等。
+编辑 `personas/erii.yaml`，可以自定义：
+
+```yaml
+# 基本信息
+name: 你的人设名字
+emoji: "🎭"
+description: 人设简介
+temperature: 0.95  # 越高越随机，越低越稳定
+maxTokens: 300
+
+# 系统提示词（核心！）
+systemPrompt: |
+  你是XXX，性格XXX...
+  【说话方式】
+  - 像真人聊天
+  - 短句为主
+  - 不要句尾加句号
+
+# 戳一戳回复
+pokeReplies:
+  - 嗯？
+  - 干嘛
+
+# 触发关键词
+triggers:
+  keywords: ["关键词1", "关键词2"]
+  command: "/你的命令"
+```
+
+**内置多人格：**
+- 蓝色大肥鱼 🐋
+- 猫娘 🐱
+- 冷酷助手 🖤
+- 上杉绘梨衣 🐍
+- 元气少女 ⚡
+- 温柔姐姐 🌙
+- 博学学者 📚
+- 傲娇 😤
+
+可以在 `config/app.yaml` 里切换默认人设：
+```yaml
+persona:
+  default: erii  # 改成你想要的人设 ID
+```
 
 ---
 
