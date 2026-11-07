@@ -15,15 +15,16 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # 配置变量
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 QQAGENT_DIR="/opt/QQagent"
 SNOWLUMA_IMAGE="snowluma/snowluma:latest"
 WS_PORT=3001
 ACCESS_TOKEN="erii2024secretkey"
 
 echo ""
-echo "[1/6] 安装系统依赖..."
+echo "[1/7] 安装系统依赖..."
 apt update -y
-apt install -y docker.io docker-compose python3 python3-pip git curl wget xdotool
+apt install -y docker.io docker-compose python3 python3-pip git curl wget xdotool ffmpeg
 
 # 安装 Node.js
 if ! command -v node &> /dev/null; then
@@ -33,10 +34,10 @@ if ! command -v node &> /dev/null; then
 fi
 
 # 安装 Python 依赖
-pip3 install websockets faster-whisper flask openai
+pip3 install websockets faster-whisper flask openai requests beautifulsoup4
 
 echo ""
-echo "[2/6] 部署 SnowLuma 协议端..."
+echo "[2/7] 部署 SnowLuma 协议端..."
 docker pull $SNOWLUMA_IMAGE
 
 # 创建数据目录
@@ -55,7 +56,7 @@ docker run -d \
 echo "SnowLuma 容器已启动"
 
 echo ""
-echo "[3/6] 安装 QQagent..."
+echo "[3/7] 安装 QQagent..."
 if [ ! -d "$QQAGENT_DIR" ]; then
   git clone https://github.com/your-username/QQagent.git $QQAGENT_DIR
 fi
@@ -64,20 +65,19 @@ cd $QQAGENT_DIR
 npm install
 
 echo ""
-echo "[4/6] 配置文件..."
-# 复制配置文件
+echo "[4/7] 复制配置文件和脚本..."
+# 复制配置
 mkdir -p config/personas
-cp /opt/QQagent/config/app.yaml config/app.yaml 2>/dev/null || true
-cp /opt/QQagent/config/providers.local.yaml config/providers.local.yaml 2>/dev/null || true
-cp /opt/QQagent/config/personas/erii.yaml config/personas/erii.yaml 2>/dev/null || true
+cp $SCRIPT_DIR/config/app.yaml config/app.yaml
+cp $SCRIPT_DIR/config/providers.local.yaml config/providers.local.yaml
+cp $SCRIPT_DIR/personas/erii.yaml config/personas/erii.yaml
 
-# 如果没有配置文件，从模板复制
-if [ ! -f config/app.yaml ]; then
-  echo "请编辑 config/app.yaml 填入你的配置"
-fi
+# 复制脚本
+mkdir -p scripts
+cp $SCRIPT_DIR/scripts/*.py scripts/
 
 echo ""
-echo "[5/6] 配置 systemd 服务..."
+echo "[5/7] 配置 systemd 服务..."
 # QQagent 服务
 cat > /etc/systemd/system/qqagent.service << EOF
 [Unit]
@@ -115,17 +115,71 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
+# 本地 ASR 服务
+cat > /etc/systemd/system/local-asr.service << EOF
+[Unit]
+Description=Local Whisper ASR Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=$QQAGENT_DIR
+ExecStart=/usr/bin/python3 scripts/local_asr.py
+Restart=always
+RestartSec=5
+Environment=HF_ENDPOINT=https://hf-mirror.com
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# TTS 服务
+cat > /etc/systemd/system/tts-server.service << EOF
+[Unit]
+Description=Edge TTS Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=$QQAGENT_DIR
+ExecStart=/usr/bin/python3 scripts/tts_server.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 systemctl daemon-reload
 
 echo ""
-echo "[6/6] 启动服务..."
+echo "[6/7] 启动服务..."
 systemctl enable --now qqagent
 systemctl enable --now auto-approve
+systemctl enable --now local-asr
+systemctl enable --now tts-server
 
+echo ""
+echo "[7/7] 完成！"
 echo ""
 echo "========================================="
 echo "  部署完成！"
 echo "========================================="
+echo ""
+echo "功能列表："
+echo "  - 拟人化聊天（上杉绘梨衣人设）"
+echo "  - 语音识别（本地 Whisper ASR）"
+echo "  - 视觉理解（Gemini 视觉模型）"
+echo "  - 文件读取（TXT/MD/DOCX）"
+echo "  - 音乐播放（alisten_music）"
+echo "  - 网页搜索（web_search）"
+echo "  - QQ空间发帖（qzone_post）"
+echo "  - 记忆库，自动对话总结"
+echo "  - 情绪系统，多维度情绪调节"
+echo "  - 主动发言，觉得有意思就分享"
+echo "  - 自动通过好友申请、自动进群"
 echo ""
 echo "下一步："
 echo "1. 查看 SnowLuma 日志：docker logs snowluma"
