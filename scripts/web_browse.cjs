@@ -20,15 +20,12 @@ async function browseAndScreenshot(url, outputPath) {
   
   const page = await browser.newPage();
   
-  // 判断是不是 B站，如果是就用手机版
   const isBilibili = url.includes('bilibili.com');
   const isXiaoheihe = url.includes('xiaoheihe.cn');
   
   if (isBilibili) {
-    // 手机版 User-Agent
     await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
     await page.setViewport({ width: 375, height: 667 });
-    // 改成手机版 URL
     if (url.includes('www.bilibili.com')) {
       url = url.replace('www.bilibili.com', 'm.bilibili.com');
     }
@@ -37,7 +34,7 @@ async function browseAndScreenshot(url, outputPath) {
     await page.setViewport({ width: 1280, height: 800 });
   }
   
-  // 小黑盒特殊处理：先访问主页，再进社区，避免触发验证码
+  // 小黑盒特殊处理：先访问主页，再进社区
   if (isXiaoheihe) {
     console.log('先访问小黑盒主页...');
     await page.goto('https://xiaoheihe.cn', { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -47,12 +44,15 @@ async function browseAndScreenshot(url, outputPath) {
   }
   
   console.log('打开页面: ' + url);
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  try {
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  } catch (e) {
+    console.log('打开页面失败: ' + e.message);
+  }
   
   console.log('正在浏览页面...');
   await new Promise(r => setTimeout(r, 5000));
   
-  // 滚动一下
   await page.evaluate(() => {
     window.scrollBy(0, 200);
   });
@@ -78,46 +78,44 @@ async function browseAndScreenshot(url, outputPath) {
         const randomIndex = Math.floor(Math.random() * links.length);
         const randomLink = links[randomIndex];
         
-        // 获取链接地址
         let href = await randomLink.evaluate(el => el.href);
         console.log('原始链接: ' + href);
         
-        // 如果是 B站，把链接也改成手机版
         if (isBilibili && href.includes('www.bilibili.com')) {
           href = href.replace('www.bilibili.com', 'm.bilibili.com');
           console.log('改成手机版: ' + href);
         }
         
-        // 直接跳转
-        await page.goto(href, { 
-          waitUntil: 'domcontentloaded', 
-          timeout: 20000,
-          referer: url
-        });
-        clicked = true;
-        
-        await new Promise(r => setTimeout(r, 3000));
-        console.log('内容页面加载完成');
-        
-        // B站视频页面：点击"立即播放"按钮
-        if (isBilibili) {
-          try {
-            // 查找包含"立即播放"文字的按钮
-            const playBtn = await page.evaluateHandle(() => {
-              const buttons = Array.from(document.querySelectorAll('button, a, div'));
-              return buttons.find(b => b.textContent.includes('立即播放'));
-            });
-            if (playBtn) {
-              console.log('点击立即播放按钮...');
-              await playBtn.click();
-              await new Promise(r => setTimeout(r, 5000));
-              console.log('开始播放了');
-            } else {
-              console.log('没找到立即播放按钮');
+        try {
+          await page.goto(href, { 
+            waitUntil: 'domcontentloaded', 
+            timeout: 20000,
+            referer: url
+          });
+          clicked = true;
+          
+          await new Promise(r => setTimeout(r, 5000));
+          console.log('内容页面加载完成');
+          
+          // B站自动播放
+          if (isBilibili) {
+            try {
+              const playBtn = await page.evaluateHandle(() => {
+                const buttons = Array.from(document.querySelectorAll('button, a, div'));
+                return buttons.find(b => b.textContent.includes('立即播放'));
+              });
+              if (playBtn) {
+                console.log('点击立即播放按钮...');
+                await playBtn.click();
+                await new Promise(r => setTimeout(r, 3000));
+                console.log('开始播放了');
+              }
+            } catch (e) {
+              console.log('点击播放失败: ' + e.message);
             }
-          } catch (e) {
-            console.log('点击播放失败: ' + e.message);
           }
+        } catch (e) {
+          console.log('跳转失败，就截首页吧: ' + e.message);
         }
       }
     }
@@ -135,7 +133,6 @@ async function browseAndScreenshot(url, outputPath) {
     console.log('提取标题失败');
   }
   
-  // 再滚动一下
   try {
     await page.evaluate(() => {
       window.scrollBy(0, 200);
@@ -147,11 +144,11 @@ async function browseAndScreenshot(url, outputPath) {
   
   try {
     await page.screenshot({ path: outputPath, fullPage: false });
+    console.log('截图已保存: ' + outputPath);
+    if (clicked) console.log('（这是点进去后的内容页面）');
   } catch (e) {
     console.log('截图失败: ' + e.message);
   }
-  console.log('截图已保存: ' + outputPath);
-  if (clicked) console.log('（这是点进去后的内容页面）');
   
   await browser.close();
   
