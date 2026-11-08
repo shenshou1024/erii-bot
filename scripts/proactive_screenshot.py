@@ -1,180 +1,101 @@
-import asyncio
-import json
-import random
-import re
-import subprocess
-import base64
-import websockets
-
-WS_URL = 'ws://127.0.0.1:3001'
-ACCESS_TOKEN = 'erii2024secretkey'
-TARGET_QQ = '1701793763'
-
-# 概率分配
-URL_GROUPS = [
-    ('B站', [
-        'https://www.bilibili.com',
-        'https://www.bilibili.com/anime/',
-        'https://www.bilibili.com/variant/3',
-        'https://www.bilibili.com/variant/64',
-        'https://www.bilibili.com/variant/56',
-    ], 0.30),
-    ('小黑盒', [
-        'https://xiaoheihe.cn/app/bbs/home',
-    ], 0.25),
-    ('小说', [
-        'https://www.qidian.com',
-        'https://www.jjwxc.net',
-        'https://fanqienovel.com',
-        'https://www.ciweimao.com',
-    ], 0.15),
-    ('其他', [
-        'https://www.douban.com/group/topic/',
-        'https://music.163.com',
-        'https://www.zhihu.com/topic/19552732',
-        'https://weibo.com/u/5516721467',
-        'https://www.douyin.com',
-        'https://www.4399.com',
-    ], 0.20),
-    ('休息', [], 0.10),
-]
-
-# 晚安模式状态
-sleep_mode = False
-
-def pick_url():
-    global sleep_mode
-    if sleep_mode:
-        return None  # 晚安模式下不主动截图
-    r = random.random()
-    cumulative = 0
-    for group_name, urls, prob in URL_GROUPS:
-        cumulative += prob
-        if r < cumulative:
-            if group_name == '休息':
-                return None
-            return random.choice(urls)
-    return URL_GROUPS[0][1][0]
-
-MESSAGES = [
-    'Sakura 你看这个！',
-    '我刷到个好玩的',
-    '给你看看这个',
-    '这个有意思',
-    '你看看这个',
-]
-
-async def send_screenshot(ws, url, text=None):
-    output = '/tmp/proactive_screenshot.png'
-    print(f'截图: {url}')
-    
-    result = subprocess.run(['node', '/opt/QQagent/scripts/web_browse.cjs', url, output], 
-                          capture_output=True, text=True, timeout=60)
-    print(result.stdout)
-    if result.returncode != 0:
-        print(f'截图失败: {result.stderr}')
-        return
-    
-    # 提取标题
-    title = ''
-    if '---内容开始---' in result.stdout and '---内容结束---' in result.stdout:
-        title = result.stdout.split('---内容开始---')[1].split('---内容结束---')[0].strip()
-    
-    if not text:
-        text = random.choice(MESSAGES)
-    if title:
-        text = text + '\n\n' + title
-    
-    # 发文字
-    msg_data = {
-        'action': 'send_private_msg',
-        'params': {
-            'user_id': int(TARGET_QQ),
-            'message': [{'type': 'text', 'data': {'text': text}}]
-        }
-    }
-    await ws.send(json.dumps(msg_data))
-    print(f'已发送: {text}')
-    
-    await asyncio.sleep(2)
-    
-    # 发图片
-    with open(output, 'rb') as f:
-        img_b64 = base64.b64encode(f.read()).decode()
-    
-    img_msg = {
-        'action': 'send_private_msg',
-        'params': {
-            'user_id': int(TARGET_QQ),
-            'message': [{'type': 'image', 'data': {'file': f'base64://{img_b64}'}}]
-        }
-    }
-    await ws.send(json.dumps(img_msg))
-    print('图片已发送')
-    
-    # 发完后自动删除临时文件
-    import os
-    if os.path.exists(output):
-        os.remove(output)
-        print('临时文件已删除')
-
-async def listen_and_screenshot(ws):
-    print('开始监听消息...')
-    async for message in ws:
-        try:
-            data = json.loads(message)
-            if data.get('post_type') == 'message' and data.get('message_type') == 'private':
-                user_id = str(data.get('user_id', ''))
-                raw_message = data.get('raw_message', '').strip()
-                if user_id == TARGET_QQ:
-                    global sleep_mode
-                    # 晚安模式
-                    if '晚安' in raw_message:
-                        sleep_mode = True
-                        print('进入晚安模式，暂停主动功能')
-                    # 恢复模式
-                    elif raw_message and raw_message not in ['晚安']:
-                        if sleep_mode:
-                            sleep_mode = False
-                            print('退出晚安模式，恢复主动功能')
-                    # 截图指令
-                    if '截图' in raw_message or '看看网页' in raw_message or '刷一下' in raw_message:
-                        print(f'收到指令: {raw_message}')
-                        url = pick_url()
-                        if url:
-                            asyncio.create_task(send_screenshot(ws, url))
-        except Exception as e:
-            print(f'处理消息错误: {e}')
-
-async def proactive_loop(ws):
-    print('开始主动截图循环...')
-    while True:
-        wait_time = random.randint(600, 900)  # 10-15分钟
-        print(f'等待 {wait_time//60} 分钟...')
-        await asyncio.sleep(wait_time)
-        
-        url = pick_url()
-        if url:
-            print(f'主动截图: {url}')
-            try:
-                await send_screenshot(ws, url)
-            except Exception as e:
-                print(f'主动截图失败: {e}')
-
-async def main():
-    while True:
-        try:
-            print(f'连接到 {WS_URL}...')
-            async with websockets.connect(WS_URL, additional_headers={'Authorization': f'Bearer {ACCESS_TOKEN}'}) as ws:
-                print('已连接!')
-                
-                await asyncio.gather(
-                    listen_and_screenshot(ws),
-                    proactive_loop(ws)
-                )
-        except Exception as e:
-            print(f'连接失败: {e}')
-            await asyncio.sleep(5)
-
-if __name__ == '__main__':
-    asyncio.run(main())
+aW1wb3J0IGFzeW5jaW8KaW1wb3J0IGpzb24KaW1wb3J0IHJhbmRvbQppbXBvcnQgcmUKaW1wb3J0
+IHN1YnByb2Nlc3MKaW1wb3J0IGJhc2U2NAppbXBvcnQgd2Vic29ja2V0cwoKV1NfVVJMID0gJ3dz
+Oi8vMTI3LjAuMC4xOjMwMDEnCkFDQ0VTU19UT0tFTiA9ICdlcmlpMjAyNHNlY3JldGtleScKVEFS
+R0VUX1FRID0gJzE3MDE3OTM3NjMnCgojIOamgueOh+WIhumFjQpVUkxfR1JPVVBTID0gWwogICAg
+KCdC56uZJywgWwogICAgICAgICdodHRwczovL3d3dy5iaWxpYmlsaS5jb20nLAogICAgICAgICdo
+dHRwczovL3d3dy5iaWxpYmlsaS5jb20vYW5pbWUvJywKICAgICAgICAnaHR0cHM6Ly93d3cuYmls
+aWJpbGkuY29tL3ZhcmlhbnQvMycsCiAgICAgICAgJ2h0dHBzOi8vd3d3LmJpbGliaWxpLmNvbS92
+YXJpYW50LzY0JywKICAgICAgICAnaHR0cHM6Ly93d3cuYmlsaWJpbGkuY29tL3ZhcmlhbnQvNTYn
+LAogICAgXSwgMC4zMCksCiAgICAoJ+Wwj+m7keebkicsIFsKICAgICAgICAnaHR0cHM6Ly94aWFv
+aGVpaGUuY24vYXBwL2Jicy9ob21lJywKICAgIF0sIDAuMjUpLAogICAgKCflsI/or7QnLCBbCiAg
+ICAgICAgJ2h0dHBzOi8vd3d3LnFpZGlhbi5jb20nLAogICAgICAgICdodHRwczovL3d3dy5qand4
+Yy5uZXQnLAogICAgICAgICdodHRwczovL2ZhbnFpZW5vdmVsLmNvbScsCiAgICAgICAgJ2h0dHBz
+Oi8vd3d3LmNpd2VpbWFvLmNvbScsCiAgICBdLCAwLjE1KSwKICAgICgn5YW25LuWJywgWwogICAg
+ICAgICdodHRwczovL3d3dy5kb3ViYW4uY29tL2dyb3VwL3RvcGljLycsCiAgICAgICAgJ2h0dHBz
+Oi8vbXVzaWMuMTYzLmNvbScsCiAgICAgICAgJ2h0dHBzOi8vd3d3LnpoaWh1LmNvbS90b3BpYy8x
+OTU1MjczMicsCiAgICAgICAgJ2h0dHBzOi8vd2VpYm8uY29tL3UvNTUxNjcyMTQ2NycsCiAgICAg
+ICAgJ2h0dHBzOi8vd3d3LmRvdXlpbi5jb20nLAogICAgICAgICdodHRwczovL3d3dy40Mzk5LmNv
+bScsCiAgICBdLCAwLjIwKSwKICAgICgn5LyR5oGvJywgW10sIDAuMTApLApdCgojIOaZmuWuieao
+oeW8j+eKtuaAgQpzbGVlcF9tb2RlID0gRmFsc2UKCmRlZiBwaWNrX3VybCgpOgogICAgZ2xvYmFs
+IHNsZWVwX21vZGUKICAgIGlmIHNsZWVwX21vZGU6CiAgICAgICAgcmV0dXJuIE5vbmUgICMg5pma
+5a6J5qih5byP5LiL5LiN5Li75Yqo5oiq5Zu+CiAgICByID0gcmFuZG9tLnJhbmRvbSgpCiAgICBj
+dW11bGF0aXZlID0gMAogICAgZm9yIGdyb3VwX25hbWUsIHVybHMsIHByb2IgaW4gVVJMX0dST1VQ
+UzoKICAgICAgICBjdW11bGF0aXZlICs9IHByb2IKICAgICAgICBpZiByIDwgY3VtdWxhdGl2ZToK
+ICAgICAgICAgICAgaWYgZ3JvdXBfbmFtZSA9PSAn5LyR5oGvJzoKICAgICAgICAgICAgICAgIHJl
+dHVybiBOb25lCiAgICAgICAgICAgIHJldHVybiByYW5kb20uY2hvaWNlKHVybHMpCiAgICByZXR1
+cm4gVVJMX0dST1VQU1swXVsxXVswXQoKTUVTU0FHRVMgPSBbCiAgICAnU2FrdXJhIOS9oOeci+i/
+meS4qu+8gScsCiAgICAn5oiR5Yi35Yiw5Liq5aW9546p55qEJywKICAgICfnu5nkvaDnnIvnnIvo
+v5nkuKonLAogICAgJ+i/meS4quacieaEj+aAnScsCiAgICAn5L2g55yL55yL6L+Z5LiqJywKXQoK
+YXN5bmMgZGVmIHNlbmRfc2NyZWVuc2hvdCh3cywgdXJsLCB0ZXh0PU5vbmUpOgogICAgb3V0cHV0
+ID0gJy90bXAvcHJvYWN0aXZlX3NjcmVlbnNob3QucG5nJwogICAgcHJpbnQoZifmiKrlm746IHt1
+cmx9JykKICAgIAogICAgcmVzdWx0ID0gc3VicHJvY2Vzcy5ydW4oWydub2RlJywgJy9vcHQvUVFh
+Z2VudC9zY3JpcHRzL3dlYl9icm93c2UuY2pzJywgdXJsLCBvdXRwdXRdLCAKICAgICAgICAgICAg
+ICAgICAgICAgICAgICBjYXB0dXJlX291dHB1dD1UcnVlLCB0ZXh0PVRydWUsIHRpbWVvdXQ9NjAp
+CiAgICBwcmludChyZXN1bHQuc3Rkb3V0KQogICAgaWYgcmVzdWx0LnJldHVybmNvZGUgIT0gMDoK
+ICAgICAgICBwcmludChmJ+aIquWbvuWksei0pToge3Jlc3VsdC5zdGRlcnJ9JykKICAgICAgICBy
+ZXR1cm4KICAgIAogICAgIyDmj5Dlj5bmoIfpopgKICAgIHRpdGxlID0gJycKICAgIGlmICctLS3l
+hoXlrrnlvIDlp4stLS0nIGluIHJlc3VsdC5zdGRvdXQgYW5kICctLS3lhoXlrrnnu5PmnZ8tLS0n
+IGluIHJlc3VsdC5zdGRvdXQ6CiAgICAgICAgdGl0bGUgPSByZXN1bHQuc3Rkb3V0LnNwbGl0KCct
+LS3lhoXlrrnlvIDlp4stLS0nKVsxXS5zcGxpdCgnLS0t5YaF5a6557uT5p2fLS0tJylbMF0uc3Ry
+aXAoKQogICAgCiAgICBpZiBub3QgdGV4dDoKICAgICAgICB0ZXh0ID0gcmFuZG9tLmNob2ljZShN
+RVNTQUdFUykKICAgIGlmIHRpdGxlOgogICAgICAgIHRleHQgPSB0ZXh0ICsgJ1xuXG4nICsgdGl0
+bGUKICAgIAogICAgIyDlj5HmloflrZcKICAgIG1zZ19kYXRhID0gewogICAgICAgICdhY3Rpb24n
+OiAnc2VuZF9wcml2YXRlX21zZycsCiAgICAgICAgJ3BhcmFtcyc6IHsKICAgICAgICAgICAgJ3Vz
+ZXJfaWQnOiBpbnQoVEFSR0VUX1FRKSwKICAgICAgICAgICAgJ21lc3NhZ2UnOiBbeyd0eXBlJzog
+J3RleHQnLCAnZGF0YSc6IHsndGV4dCc6IHRleHR9fV0KICAgICAgICB9CiAgICB9CiAgICBhd2Fp
+dCB3cy5zZW5kKGpzb24uZHVtcHMobXNnX2RhdGEpKQogICAgcHJpbnQoZiflt7Llj5HpgIE6IHt0
+ZXh0fScpCiAgICAKICAgIGF3YWl0IGFzeW5jaW8uc2xlZXAoMikKICAgIAogICAgIyDlj5Hlm77n
+iYcKICAgIHdpdGggb3BlbihvdXRwdXQsICdyYicpIGFzIGY6CiAgICAgICAgaW1nX2I2NCA9IGJh
+c2U2NC5iNjRlbmNvZGUoZi5yZWFkKCkpLmRlY29kZSgpCiAgICAKICAgIGltZ19tc2cgPSB7CiAg
+ICAgICAgJ2FjdGlvbic6ICdzZW5kX3ByaXZhdGVfbXNnJywKICAgICAgICAncGFyYW1zJzogewog
+ICAgICAgICAgICAndXNlcl9pZCc6IGludChUQVJHRVRfUVEpLAogICAgICAgICAgICAnbWVzc2Fn
+ZSc6IFt7J3R5cGUnOiAnaW1hZ2UnLCAnZGF0YSc6IHsnZmlsZSc6IGYnYmFzZTY0Oi8ve2ltZ19i
+NjR9J319XQogICAgICAgIH0KICAgIH0KICAgIGF3YWl0IHdzLnNlbmQoanNvbi5kdW1wcyhpbWdf
+bXNnKSkKICAgIHByaW50KCflm77niYflt7Llj5HpgIEnKQogICAgCiAgICAjIOWPkeWujOWQjuiH
+quWKqOWIoOmZpOS4tOaXtuaWh+S7tgogICAgaW1wb3J0IG9zCiAgICBpZiBvcy5wYXRoLmV4aXN0
+cyhvdXRwdXQpOgogICAgICAgIG9zLnJlbW92ZShvdXRwdXQpCiAgICAgICAgcHJpbnQoJ+S4tOaX
+tuaWh+S7tuW3suWIoOmZpCcpCgphc3luYyBkZWYgbGlzdGVuX2FuZF9zY3JlZW5zaG90KHdzKToK
+ICAgIHByaW50KCflvIDlp4vnm5HlkKzmtojmga8uLi4nKQogICAgYXN5bmMgZm9yIG1lc3NhZ2Ug
+aW4gd3M6CiAgICAgICAgdHJ5OgogICAgICAgICAgICBkYXRhID0ganNvbi5sb2FkcyhtZXNzYWdl
+KQogICAgICAgICAgICBpZiBkYXRhLmdldCgncG9zdF90eXBlJykgPT0gJ21lc3NhZ2UnIGFuZCBk
+YXRhLmdldCgnbWVzc2FnZV90eXBlJykgPT0gJ3ByaXZhdGUnOgogICAgICAgICAgICAgICAgdXNl
+cl9pZCA9IHN0cihkYXRhLmdldCgndXNlcl9pZCcsICcnKSkKICAgICAgICAgICAgICAgIHJhd19t
+ZXNzYWdlID0gZGF0YS5nZXQoJ3Jhd19tZXNzYWdlJywgJycpLnN0cmlwKCkKICAgICAgICAgICAg
+ICAgIGlmIHVzZXJfaWQgPT0gVEFSR0VUX1FROgogICAgICAgICAgICAgICAgICAgIGdsb2JhbCBz
+bGVlcF9tb2RlCiAgICAgICAgICAgICAgICAgICAgIyDmmZrlronmqKHlvI8KICAgICAgICAgICAg
+ICAgICAgICBpZiAn5pma5a6JJyBpbiByYXdfbWVzc2FnZToKICAgICAgICAgICAgICAgICAgICAg
+ICAgc2xlZXBfbW9kZSA9IFRydWUKICAgICAgICAgICAgICAgICAgICAgICAgcHJpbnQoJ+i/m+WF
+peaZmuWuieaooeW8j++8jOaaguWBnOS4u+WKqOWKn+iDvScpCiAgICAgICAgICAgICAgICAgICAg
+IyDmgaLlpI3mqKHlvI8KICAgICAgICAgICAgICAgICAgICBlbGlmIHJhd19tZXNzYWdlIGFuZCBy
+YXdfbWVzc2FnZSBub3QgaW4gWyfmmZrlroknXToKICAgICAgICAgICAgICAgICAgICAgICAgaWYg
+c2xlZXBfbW9kZToKICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNsZWVwX21vZGUgPSBGYWxz
+ZQogICAgICAgICAgICAgICAgICAgICAgICAgICAgcHJpbnQoJ+mAgOWHuuaZmuWuieaooeW8j++8
+jOaBouWkjeS4u+WKqOWKn+iDvScpCiAgICAgICAgICAgICAgICAgICAgIyDmiKrlm77mjIfku6QK
+ICAgICAgICAgICAgICAgICAgICBpZiAoJ+aIquWbvicgaW4gcmF3X21lc3NhZ2Ugb3IgKCfmiKon
+IGluIHJhd19tZXNzYWdlIGFuZCAn5Zu+JyBpbiByYXdfbWVzc2FnZSkgb3IgJ+eci+eci+e9kemh
+tScgaW4gcmF3X21lc3NhZ2Ugb3IgJ+WIt+S4gOS4iycgaW4gcmF3X21lc3NhZ2Ugb3IgJ+aIquS4
+qicgaW4gcmF3X21lc3NhZ2Ugb3IgJ+aIquS4gOS4iycgaW4gcmF3X21lc3NhZ2UpOgogICAgICAg
+ICAgICAgICAgICAgICAgICBwcmludChmJ+aUtuWIsOaMh+S7pDoge3Jhd19tZXNzYWdlfScpCiAg
+ICAgICAgICAgICAgICAgICAgICAgIHVybCA9IHBpY2tfdXJsKCkKICAgICAgICAgICAgICAgICAg
+ICAgICAgaWYgdXJsOgogICAgICAgICAgICAgICAgICAgICAgICAgICAgYXN5bmNpby5jcmVhdGVf
+dGFzayhzZW5kX3NjcmVlbnNob3Qod3MsIHVybCkpCiAgICAgICAgZXhjZXB0IEV4Y2VwdGlvbiBh
+cyBlOgogICAgICAgICAgICBwcmludChmJ+WkhOeQhua2iOaBr+mUmeivrzoge2V9JykKCmFzeW5j
+IGRlZiBwcm9hY3RpdmVfbG9vcCh3cyk6CiAgICBwcmludCgn5byA5aeL5Li75Yqo5oiq5Zu+5b6q
+546vLi4uJykKICAgIHdoaWxlIFRydWU6CiAgICAgICAgd2FpdF90aW1lID0gcmFuZG9tLnJhbmRp
+bnQoNjAwLCA5MDApICAjIDEwLTE15YiG6ZKfCiAgICAgICAgcHJpbnQoZifnrYnlvoUge3dhaXRf
+dGltZS8vNjB9IOWIhumSny4uLicpCiAgICAgICAgYXdhaXQgYXN5bmNpby5zbGVlcCh3YWl0X3Rp
+bWUpCiAgICAgICAgCiAgICAgICAgdXJsID0gcGlja191cmwoKQogICAgICAgIGlmIHVybDoKICAg
+ICAgICAgICAgcHJpbnQoZifkuLvliqjmiKrlm746IHt1cmx9JykKICAgICAgICAgICAgdHJ5Ogog
+ICAgICAgICAgICAgICAgYXdhaXQgc2VuZF9zY3JlZW5zaG90KHdzLCB1cmwpCiAgICAgICAgICAg
+IGV4Y2VwdCBFeGNlcHRpb24gYXMgZToKICAgICAgICAgICAgICAgIHByaW50KGYn5Li75Yqo5oiq
+5Zu+5aSx6LSlOiB7ZX0nKQoKYXN5bmMgZGVmIG1haW4oKToKICAgIHdoaWxlIFRydWU6CiAgICAg
+ICAgdHJ5OgogICAgICAgICAgICBwcmludChmJ+i/nuaOpeWIsCB7V1NfVVJMfS4uLicpCiAgICAg
+ICAgICAgIGFzeW5jIHdpdGggd2Vic29ja2V0cy5jb25uZWN0KFdTX1VSTCwgYWRkaXRpb25hbF9o
+ZWFkZXJzPXsnQXV0aG9yaXphdGlvbic6IGYnQmVhcmVyIHtBQ0NFU1NfVE9LRU59J30pIGFzIHdz
+OgogICAgICAgICAgICAgICAgcHJpbnQoJ+W3sui/nuaOpSEnKQogICAgICAgICAgICAgICAgCiAg
+ICAgICAgICAgICAgICBhd2FpdCBhc3luY2lvLmdhdGhlcigKICAgICAgICAgICAgICAgICAgICBs
+aXN0ZW5fYW5kX3NjcmVlbnNob3Qod3MpLAogICAgICAgICAgICAgICAgICAgIHByb2FjdGl2ZV9s
+b29wKHdzKQogICAgICAgICAgICAgICAgKQogICAgICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZToK
+ICAgICAgICAgICAgcHJpbnQoZifov57mjqXlpLHotKU6IHtlfScpCiAgICAgICAgICAgIGF3YWl0
+IGFzeW5jaW8uc2xlZXAoNSkKCmlmIF9fbmFtZV9fID09ICdfX21haW5fXyc6CiAgICBhc3luY2lv
+LnJ1bihtYWluKCkpCg==
