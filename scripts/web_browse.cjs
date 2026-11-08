@@ -13,6 +13,7 @@ async function browseAndScreenshot(url, outputPath) {
       '--disable-setuid-sandbox', 
       '--disable-dev-shm-usage', 
       '--disable-gpu',
+      '--disable-blink-features=AutomationControlled',
       '--window-size=1280,800'
     ]
   });
@@ -21,6 +22,8 @@ async function browseAndScreenshot(url, outputPath) {
   
   // 判断是不是 B站，如果是就用手机版
   const isBilibili = url.includes('bilibili.com');
+  const isXiaoheihe = url.includes('xiaoheihe.cn');
+  
   if (isBilibili) {
     // 手机版 User-Agent
     await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
@@ -32,6 +35,15 @@ async function browseAndScreenshot(url, outputPath) {
   } else {
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0');
     await page.setViewport({ width: 1280, height: 800 });
+  }
+  
+  // 小黑盒特殊处理：先访问主页，再进社区，避免触发验证码
+  if (isXiaoheihe) {
+    console.log('先访问小黑盒主页...');
+    await page.goto('https://xiaoheihe.cn', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await new Promise(r => setTimeout(r, 5000));
+    await page.evaluate(() => window.scrollBy(0, 100));
+    await new Promise(r => setTimeout(r, 2000));
   }
   
   console.log('打开页面: ' + url);
@@ -53,7 +65,7 @@ async function browseAndScreenshot(url, outputPath) {
     let selector = null;
     if (isBilibili) {
       selector = 'a[href*="/video/"]';
-    } else if (url.includes('xiaoheihe.cn')) {
+    } else if (isXiaoheihe) {
       selector = '.hb-cpt__bbs-list-content';
     } else if (url.includes('4399.com')) {
       selector = 'a[href*="/flash/"]';
@@ -84,13 +96,37 @@ async function browseAndScreenshot(url, outputPath) {
         });
         clicked = true;
         
-        await new Promise(r => setTimeout(r, 5000));
+        await new Promise(r => setTimeout(r, 3000));
         console.log('内容页面加载完成');
+        
+        // B站视频页面：点击"立即播放"按钮
+        if (isBilibili) {
+          try {
+            // 查找包含"立即播放"文字的按钮
+            const playBtn = await page.evaluateHandle(() => {
+              const buttons = Array.from(document.querySelectorAll('button, a, div'));
+              return buttons.find(b => b.textContent.includes('立即播放'));
+            });
+            if (playBtn) {
+              console.log('点击立即播放按钮...');
+              await playBtn.click();
+              await new Promise(r => setTimeout(r, 5000));
+              console.log('开始播放了');
+            } else {
+              console.log('没找到立即播放按钮');
+            }
+          } catch (e) {
+            console.log('点击播放失败: ' + e.message);
+          }
+        }
       }
     }
   } catch (e) {
     console.log('点击失败，就在首页看看: ' + e.message);
   }
+  
+  // 等待页面稳定
+  await new Promise(r => setTimeout(r, 2000));
   
   try {
     pageTitle = await page.title();
@@ -100,12 +136,20 @@ async function browseAndScreenshot(url, outputPath) {
   }
   
   // 再滚动一下
-  await page.evaluate(() => {
-    window.scrollBy(0, 200);
-  });
+  try {
+    await page.evaluate(() => {
+      window.scrollBy(0, 200);
+    });
+  } catch (e) {
+    console.log('滚动失败: ' + e.message);
+  }
   await new Promise(r => setTimeout(r, 1000));
   
-  await page.screenshot({ path: outputPath, fullPage: false });
+  try {
+    await page.screenshot({ path: outputPath, fullPage: false });
+  } catch (e) {
+    console.log('截图失败: ' + e.message);
+  }
   console.log('截图已保存: ' + outputPath);
   if (clicked) console.log('（这是点进去后的内容页面）');
   
