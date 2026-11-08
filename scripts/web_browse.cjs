@@ -1,67 +1,130 @@
-Y29uc3QgcHVwcGV0ZWVyID0gcmVxdWlyZSgnL29wdC9RUWFnZW50L25vZGVfbW9kdWxlcy9wdXBw
-ZXRlZXItZXh0cmEnKTsKY29uc3QgU3RlYWx0aFBsdWdpbiA9IHJlcXVpcmUoJy9vcHQvUVFhZ2Vu
-dC9ub2RlX21vZHVsZXMvcHVwcGV0ZWVyLWV4dHJhLXBsdWdpbi1zdGVhbHRoJyk7CgpwdXBwZXRl
-ZXIudXNlKFN0ZWFsdGhQbHVnaW4oKSk7Cgphc3luYyBmdW5jdGlvbiBicm93c2VBbmRTY3JlZW5z
-aG90KHVybCwgb3V0cHV0UGF0aCkgewogIGNvbnNvbGUubG9nKCflkK/liqggRWRnZSDmtY/op4gu
-Li4nKTsKICBjb25zdCBicm93c2VyID0gYXdhaXQgcHVwcGV0ZWVyLmxhdW5jaCh7CiAgICBoZWFk
-bGVzczogdHJ1ZSwKICAgIGV4ZWN1dGFibGVQYXRoOiAnL3Vzci9iaW4vbWljcm9zb2Z0LWVkZ2Un
-LAogICAgYXJnczogWwogICAgICAnLS1uby1zYW5kYm94JywgCiAgICAgICctLWRpc2FibGUtc2V0
-dWlkLXNhbmRib3gnLCAKICAgICAgJy0tZGlzYWJsZS1kZXYtc2htLXVzYWdlJywgCiAgICAgICct
-LWRpc2FibGUtZ3B1JywKICAgICAgJy0td2luZG93LXNpemU9MTI4MCw4MDAnCiAgICBdCiAgfSk7
-CiAgCiAgY29uc3QgcGFnZSA9IGF3YWl0IGJyb3dzZXIubmV3UGFnZSgpOwogIAogIC8vIOWIpOaW
-reaYr+S4jeaYryBC56uZ77yM5aaC5p6c5piv5bCx55So5omL5py654mICiAgY29uc3QgaXNCaWxp
-YmlsaSA9IHVybC5pbmNsdWRlcygnYmlsaWJpbGkuY29tJyk7CiAgaWYgKGlzQmlsaWJpbGkpIHsK
-ICAgIC8vIOaJi+acuueJiCBVc2VyLUFnZW50CiAgICBhd2FpdCBwYWdlLnNldFVzZXJBZ2VudCgn
-TW96aWxsYS81LjAgKGlQaG9uZTsgQ1BVIGlQaG9uZSBPUyAxNl8wIGxpa2UgTWFjIE9TIFgpIEFw
-cGxlV2ViS2l0LzYwNS4xLjE1IChLSFRNTCwgbGlrZSBHZWNrbykgVmVyc2lvbi8xNi4wIE1vYmls
-ZS8xNUUxNDggU2FmYXJpLzYwNC4xJyk7CiAgICBhd2FpdCBwYWdlLnNldFZpZXdwb3J0KHsgd2lk
-dGg6IDM3NSwgaGVpZ2h0OiA2NjcgfSk7CiAgICAvLyDmlLnmiJDmiYvmnLrniYggVVJMCiAgICBp
-ZiAodXJsLmluY2x1ZGVzKCd3d3cuYmlsaWJpbGkuY29tJykpIHsKICAgICAgdXJsID0gdXJsLnJl
-cGxhY2UoJ3d3dy5iaWxpYmlsaS5jb20nLCAnbS5iaWxpYmlsaS5jb20nKTsKICAgIH0KICB9IGVs
-c2UgewogICAgYXdhaXQgcGFnZS5zZXRVc2VyQWdlbnQoJ01vemlsbGEvNS4wIChXaW5kb3dzIE5U
-IDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28p
-IENocm9tZS8xMjAuMC4wLjAgU2FmYXJpLzUzNy4zNiBFZGcvMTIwLjAuMC4wJyk7CiAgICBhd2Fp
-dCBwYWdlLnNldFZpZXdwb3J0KHsgd2lkdGg6IDEyODAsIGhlaWdodDogODAwIH0pOwogIH0KICAK
-ICBjb25zb2xlLmxvZygn5omT5byA6aG16Z2iOiAnICsgdXJsKTsKICBhd2FpdCBwYWdlLmdvdG8o
-dXJsLCB7IHdhaXRVbnRpbDogJ2RvbWNvbnRlbnRsb2FkZWQnLCB0aW1lb3V0OiAzMDAwMCB9KTsK
-ICAKICBjb25zb2xlLmxvZygn5q2j5Zyo5rWP6KeI6aG16Z2iLi4uJyk7CiAgYXdhaXQgbmV3IFBy
-b21pc2UociA9PiBzZXRUaW1lb3V0KHIsIDUwMDApKTsKICAKICAvLyDmu5rliqjkuIDkuIsKICBh
-d2FpdCBwYWdlLmV2YWx1YXRlKCgpID0+IHsKICAgIHdpbmRvdy5zY3JvbGxCeSgwLCAyMDApOwog
-IH0pOwogIGF3YWl0IG5ldyBQcm9taXNlKHIgPT4gc2V0VGltZW91dChyLCAyMDAwKSk7CiAgCiAg
-bGV0IGNsaWNrZWQgPSBmYWxzZTsKICBsZXQgcGFnZVRpdGxlID0gJyc7CiAgCiAgdHJ5IHsKICAg
-IGxldCBzZWxlY3RvciA9IG51bGw7CiAgICBpZiAoaXNCaWxpYmlsaSkgewogICAgICBzZWxlY3Rv
-ciA9ICdhW2hyZWYqPSIvdmlkZW8vIl0nOwogICAgfSBlbHNlIGlmICh1cmwuaW5jbHVkZXMoJ3hp
-YW9oZWloZS5jbicpKSB7CiAgICAgIHNlbGVjdG9yID0gJy5oYi1jcHRfX2Jicy1saXN0LWNvbnRl
-bnQnOwogICAgfSBlbHNlIGlmICh1cmwuaW5jbHVkZXMoJzQzOTkuY29tJykpIHsKICAgICAgc2Vs
-ZWN0b3IgPSAnYVtocmVmKj0iL2ZsYXNoLyJdJzsKICAgIH0KICAgIAogICAgaWYgKHNlbGVjdG9y
-KSB7CiAgICAgIGNvbnN0IGxpbmtzID0gYXdhaXQgcGFnZS4kJChzZWxlY3Rvcik7CiAgICAgIGlm
-IChsaW5rcy5sZW5ndGggPiAwKSB7CiAgICAgICAgY29uc29sZS5sb2coJ+WPkeeOsCAnICsgbGlu
-a3MubGVuZ3RoICsgJyDkuKrlhoXlrrnljaHniYfvvIzpmo/mnLrngrnkuIDkuKouLi4nKTsKICAg
-ICAgICBjb25zdCByYW5kb21JbmRleCA9IE1hdGguZmxvb3IoTWF0aC5yYW5kb20oKSAqIGxpbmtz
-Lmxlbmd0aCk7CiAgICAgICAgY29uc3QgcmFuZG9tTGluayA9IGxpbmtzW3JhbmRvbUluZGV4XTsK
-ICAgICAgICAKICAgICAgICAvLyDojrflj5bpk77mjqXlnLDlnYAKICAgICAgICBjb25zdCBocmVm
-ID0gYXdhaXQgcmFuZG9tTGluay5ldmFsdWF0ZShlbCA9PiBlbC5ocmVmKTsKICAgICAgICBjb25z
-b2xlLmxvZygn54K55Ye76ZO+5o6lOiAnICsgaHJlZik7CiAgICAgICAgCiAgICAgICAgLy8g55u0
-5o6l6Lez6L2sCiAgICAgICAgYXdhaXQgcGFnZS5nb3RvKGhyZWYsIHsgCiAgICAgICAgICB3YWl0
-VW50aWw6ICdkb21jb250ZW50bG9hZGVkJywgCiAgICAgICAgICB0aW1lb3V0OiAyMDAwMCwKICAg
-ICAgICAgIHJlZmVyZXI6IHVybAogICAgICAgIH0pOwogICAgICAgIGNsaWNrZWQgPSB0cnVlOwog
-ICAgICAgIAogICAgICAgIGF3YWl0IG5ldyBQcm9taXNlKHIgPT4gc2V0VGltZW91dChyLCA1MDAw
-KSk7CiAgICAgICAgY29uc29sZS5sb2coJ+WGheWuuemhtemdouWKoOi9veWujOaIkCcpOwogICAg
-ICB9CiAgICB9CiAgfSBjYXRjaCAoZSkgewogICAgY29uc29sZS5sb2coJ+eCueWHu+Wksei0pe+8
-jOWwseWcqOmmlumhteeci+ecizogJyArIGUubWVzc2FnZSk7CiAgfQogIAogIHRyeSB7CiAgICBw
-YWdlVGl0bGUgPSBhd2FpdCBwYWdlLnRpdGxlKCk7CiAgICBjb25zb2xlLmxvZygn6aG16Z2i5qCH
-6aKYOiAnICsgcGFnZVRpdGxlKTsKICB9IGNhdGNoIChlKSB7CiAgICBjb25zb2xlLmxvZygn5o+Q
-5Y+W5qCH6aKY5aSx6LSlJyk7CiAgfQogIAogIC8vIOWGjea7muWKqOS4gOS4iwogIGF3YWl0IHBh
-Z2UuZXZhbHVhdGUoKCkgPT4gewogICAgd2luZG93LnNjcm9sbEJ5KDAsIDIwMCk7CiAgfSk7CiAg
-YXdhaXQgbmV3IFByb21pc2UociA9PiBzZXRUaW1lb3V0KHIsIDEwMDApKTsKICAKICBhd2FpdCBw
-YWdlLnNjcmVlbnNob3QoeyBwYXRoOiBvdXRwdXRQYXRoLCBmdWxsUGFnZTogZmFsc2UgfSk7CiAg
-Y29uc29sZS5sb2coJ+aIquWbvuW3suS/neWtmDogJyArIG91dHB1dFBhdGgpOwogIGlmIChjbGlj
-a2VkKSBjb25zb2xlLmxvZygn77yI6L+Z5piv54K56L+b5Y675ZCO55qE5YaF5a656aG16Z2i77yJ
-Jyk7CiAgCiAgYXdhaXQgYnJvd3Nlci5jbG9zZSgpOwogIAogIGNvbnNvbGUubG9nKCctLS3lhoXl
-rrnlvIDlp4stLS0nKTsKICBjb25zb2xlLmxvZyhwYWdlVGl0bGUpOwogIGNvbnNvbGUubG9nKCct
-LS3lhoXlrrnnu5PmnZ8tLS0nKTsKfQoKY29uc3QgdXJsID0gcHJvY2Vzcy5hcmd2WzJdOwpjb25z
-dCBvdXRwdXQgPSBwcm9jZXNzLmFyZ3ZbM10gfHwgJy90bXAvc2NyZWVuc2hvdC5wbmcnOwoKaWYg
-KCF1cmwpIHsKICBjb25zb2xlLmxvZygn55So5rOVOiBub2RlIHdlYl9icm93c2UuY2pzIDx1cmw+
-IFtvdXRwdXRdJyk7CiAgcHJvY2Vzcy5leGl0KDEpOwp9Cgpicm93c2VBbmRTY3JlZW5zaG90KHVy
-bCwgb3V0cHV0KS5jYXRjaChlcnIgPT4gewogIGNvbnNvbGUuZXJyb3IoJ+Wksei0pTonLCBlcnIu
-bWVzc2FnZSk7CiAgcHJvY2Vzcy5leGl0KDEpOwp9KTsK
+const puppeteer = require('/opt/QQagent/node_modules/puppeteer-extra');
+const StealthPlugin = require('/opt/QQagent/node_modules/puppeteer-extra-plugin-stealth');
+
+puppeteer.use(StealthPlugin());
+
+async function browseAndScreenshot(url, outputPath) {
+  console.log('启动 Edge 浏览...');
+  const browser = await puppeteer.launch({
+    headless: true,
+    executablePath: '/usr/bin/microsoft-edge',
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox', 
+      '--disable-dev-shm-usage', 
+      '--disable-gpu',
+      '--window-size=1280,800'
+    ]
+  });
+  
+  const page = await browser.newPage();
+  
+  // 判断是不是 B站，如果是就用手机版
+  const isBilibili = url.includes('bilibili.com');
+  if (isBilibili) {
+    // 手机版 User-Agent
+    await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
+    await page.setViewport({ width: 375, height: 667 });
+    // 改成手机版 URL
+    if (url.includes('www.bilibili.com')) {
+      url = url.replace('www.bilibili.com', 'm.bilibili.com');
+    }
+  } else {
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0');
+    await page.setViewport({ width: 1280, height: 800 });
+  }
+  
+  console.log('打开页面: ' + url);
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  
+  console.log('正在浏览页面...');
+  await new Promise(r => setTimeout(r, 5000));
+  
+  // 滚动一下
+  await page.evaluate(() => {
+    window.scrollBy(0, 200);
+  });
+  await new Promise(r => setTimeout(r, 2000));
+  
+  let clicked = false;
+  let pageTitle = '';
+  
+  try {
+    let selector = null;
+    if (isBilibili) {
+      selector = 'a[href*="/video/"]';
+    } else if (url.includes('xiaoheihe.cn')) {
+      selector = '.hb-cpt__bbs-list-content';
+    } else if (url.includes('4399.com')) {
+      selector = 'a[href*="/flash/"]';
+    }
+    
+    if (selector) {
+      const links = await page.$$(selector);
+      if (links.length > 0) {
+        console.log('发现 ' + links.length + ' 个内容卡片，随机点一个...');
+        const randomIndex = Math.floor(Math.random() * links.length);
+        const randomLink = links[randomIndex];
+        
+        // 获取链接地址
+        let href = await randomLink.evaluate(el => el.href);
+        console.log('原始链接: ' + href);
+        
+        // 如果是 B站，把链接也改成手机版
+        if (isBilibili && href.includes('www.bilibili.com')) {
+          href = href.replace('www.bilibili.com', 'm.bilibili.com');
+          console.log('改成手机版: ' + href);
+        }
+        
+        // 直接跳转
+        await page.goto(href, { 
+          waitUntil: 'domcontentloaded', 
+          timeout: 20000,
+          referer: url
+        });
+        clicked = true;
+        
+        await new Promise(r => setTimeout(r, 5000));
+        console.log('内容页面加载完成');
+      }
+    }
+  } catch (e) {
+    console.log('点击失败，就在首页看看: ' + e.message);
+  }
+  
+  try {
+    pageTitle = await page.title();
+    console.log('页面标题: ' + pageTitle);
+  } catch (e) {
+    console.log('提取标题失败');
+  }
+  
+  // 再滚动一下
+  await page.evaluate(() => {
+    window.scrollBy(0, 200);
+  });
+  await new Promise(r => setTimeout(r, 1000));
+  
+  await page.screenshot({ path: outputPath, fullPage: false });
+  console.log('截图已保存: ' + outputPath);
+  if (clicked) console.log('（这是点进去后的内容页面）');
+  
+  await browser.close();
+  
+  console.log('---内容开始---');
+  console.log(pageTitle);
+  console.log('---内容结束---');
+}
+
+const url = process.argv[2];
+const output = process.argv[3] || '/tmp/screenshot.png';
+
+if (!url) {
+  console.log('用法: node web_browse.cjs <url> [output]');
+  process.exit(1);
+}
+
+browseAndScreenshot(url, output).catch(err => {
+  console.error('失败:', err.message);
+  process.exit(1);
+});
