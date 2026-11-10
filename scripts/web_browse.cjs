@@ -156,25 +156,29 @@ async function browseAndScreenshot(url, outputPath) {
       console.log('打开页面失败: ' + e.message);
     }
 
-    await sleep(3000, 5000);
+    console.log('页面已加载，模拟浏览滚动...');
+    await sleep(2500, 4000);
     await humanScroll(page, 2);
+    console.log('滚动完成，检测验证码...');
 
     // ===== 验证码检测：小黑盒优先，检测到就不点击内容，避免截到验证页 =====
     if (isXiaoheihe) {
       captchaDetected = captchaDetected || await detectCaptcha(page);
       if (captchaDetected) {
         console.log('⚠️ 检测到小黑盒安全验证，放弃点帖子，回退主页截图');
+      } else {
+        console.log('未检测到验证码');
       }
     }
 
     // ===== 点击内容卡片（有验证码时跳过）=====
+    // 注意：小黑盒只截社区列表页（列表本身就是帖子流），不自动点进帖子详情，
+    // 避免详情页 SPA 加载卡住或触发二次验证。
     if (!captchaDetected) {
       try {
         let selector = null;
         if (isBilibili) {
           selector = 'a[href*="/video/"]';
-        } else if (isXiaoheihe) {
-          selector = '.hb-cpt__bbs-list-content, .bbs-item, a[href*="/bbs/"]';
         } else if (url.includes('4399.com')) {
           selector = 'a[href*="/flash/"]';
         }
@@ -197,7 +201,7 @@ async function browseAndScreenshot(url, outputPath) {
             try {
               await page.goto(href, {
                 waitUntil: 'domcontentloaded',
-                timeout: 20000,
+                timeout: 12000,
                 referer: url
               });
               clicked = true;
