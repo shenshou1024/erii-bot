@@ -152,6 +152,11 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
+# 注意：网页截图服务（proactive-screenshot）在 v0.2.3 起默认禁用，
+# 原因：与 QQagent 同时连接同一 OneBot WebSocket 存在多客户端冲突，
+# 且偶发崩溃重启占用资源。源码保留在 scripts/ 与 systemd/ 中，
+# 待问题修复后可手动启用，不在此自动创建/启动。
+
 systemctl daemon-reload
 
 echo ""
@@ -180,6 +185,7 @@ echo "  - 记忆库，自动对话总结"
 echo "  - 情绪系统，多维度情绪调节"
 echo "  - 主动发言，觉得有意思就分享"
 echo "  - 自动通过好友申请、自动进群"
+echo "  （网页截图功能 v0.2.3 起暂时禁用，详见 README）"
 echo ""
 echo "下一步："
 echo "1. 查看 SnowLuma 日志：docker logs snowluma"

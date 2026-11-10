@@ -1,3 +1,7 @@
+// ============================================================
+// ⚠️ 网页浏览截图脚本自 v0.2.3 起默认禁用（源码保留待修复）
+// 原因：与 QQagent 多客户端 WebSocket 冲突，截图偶发崩溃占用资源
+// ============================================================
 const puppeteer = require('/opt/QQagent/node_modules/puppeteer-extra');
 const StealthPlugin = require('/opt/QQagent/node_modules/puppeteer-extra-plugin-stealth');
 
