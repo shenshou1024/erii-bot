@@ -71,6 +71,17 @@
    goodnight.observe(msg.scope, msg.text);
    ```
 
+## 改动文件三：`proactive_msg.cjs`（独立私聊主动推送脚本）
+
+> 该脚本是独立 WS 客户端，与主框架内存不共享；当前对应 `proactive-msg.service` 处于 **disabled / inactive**（与截图服务一并停用，避免多客户端 WS 冲突）。此处仅做源码对齐，将来重新启用时行为与主框架一致。
+
+- 监听目标私聊入站消息（`post_type=message`、`message_type=private`、`user_id=TARGET_QQ`），提取 `raw_message` 纯文本
+- 命中晚安关键词 → 进入静默，跳过本次及后续主动私聊推送；发来普通消息 → 解除静默
+- 兜底：进入静默后到下一个 20:00 自动解除，算法与 `goodnight.ts` 一致
+- 改动前发送前先过静默闸门；服务本体不随部署自动启动
+
+完整源码见仓库 `scripts/proactive_msg.cjs`。
+
 ## 验证
 
 - `npm run typecheck`（tsc --noEmit）通过，无类型错误
